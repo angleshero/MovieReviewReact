@@ -1,14 +1,29 @@
 
-import React from 'react'
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
 
-import './App.css'
+import Home from "./pages/Home.jsx";
+import Movies from "./pages/Movies.jsx";
+import MovieDetail from "./pages/MovieDetail.jsx"; 
+// If your file is named MovieDetails.jsx instead, use:
+// import MovieDetail from "./pages/MovieDetails.jsx";
 
-function App() {
+import "./App.css";
+
+export default function App() {
   return (
-    <div className="app">
-      <MovieReviews />
-    </div>
-  )
-}
+    <Routes>
+      {/* Home page */}
+      <Route path="/" element={<Home />} />
 
-export default App
+      {/* Movies list page */}
+      <Route path="/movies" element={<Movies />} />
+
+      {/* Movie detail page */}
+      <Route path="/movies/:id" element={<MovieDetail />} />
+
+      {/* Fallback for any unknown route */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
