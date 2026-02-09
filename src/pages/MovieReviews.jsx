@@ -2,8 +2,8 @@ import React, { useMemo, useState } from 'react'
 import './styles.css'
 
 
-import beforeSunrise from './assets/BeforeSunrise.jpg'
-import bigFish from './assets/big-fish.jpg'
+import beforeSunrise from './assets/before-sunrise.jpg'
+import bigFish from './assets/bigfish.jpg'
 import ghostDog from './assets/ghostdog.jpg'
 import mallrats from './assets/Mallrats.jpg'
 import meteorMan from './assets/MeteorMan.jpg'
