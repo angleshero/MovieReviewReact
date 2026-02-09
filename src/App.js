@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
 import Home from "./pages/Home.jsx";
 import Movies from "./pages/Movies.jsx";
@@ -12,6 +12,7 @@ import "./App.css";
 
 export default function App() {
   return (
+    <Router>
     <Routes>
       {/* Home page */}
       <Route path="/" element={<Home />} />
@@ -25,5 +26,6 @@ export default function App() {
       {/* Fallback for any unknown route */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </Router>
   );
 }
