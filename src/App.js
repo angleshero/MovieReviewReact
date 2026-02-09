@@ -5,9 +5,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import Home from "./pages/Home.jsx";
 import Movies from "./pages/Movies.jsx";
 import MovieDetail from "./pages/MovieDetails.jsx"; 
-// If your file is named MovieDetails.jsx instead, use:
-// import MovieDetail from "./pages/MovieDetails.jsx";
-
 import "./App.css";
 
 export default function App() {
