@@ -1,106 +1,83 @@
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { MERGED_MOVIES_MAP } from "../data/movies.js";
 
 const API_KEY = import.meta.env?.VITE_OMDB_API_KEY;
 
 export default function MovieDetail() {
   const { id } = useParams();
-
-  // Local-first: look up by our merged id
-  const localMovie = useMemo(() => MERGED_MOVIES_MAP.get(String(id)), [id]);
-
-  const [omdb, setOmdb] = useState(null);
-  const [status, setStatus] = useState("idle"); // idle | loading | done | error
+  const [movie, setMovie] = useState(null);
+  const [status, setStatus] = useState("idle"); // idle | loading | error | done
   const [error, setError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
 
-    // If route id is an IMDb id (tt\d+) use it; else use localMovie.imdbID if present
-    const imdbIdFromRoute = /^tt\d+$/i.test(id) ? id : null;
-    const imdbId = imdbIdFromRoute || localMovie?.imdbID;
-
-    if (!API_KEY || !imdbId) {
-      setOmdb(null);
-      setStatus("done");
+    if (!API_KEY) {
+      setStatus("error");
+      setError("Missing VITE_OMDB_API_KEY in .env");
       return;
     }
+
+    const url = `https://www.omdbapi.com/?apikey=${API_KEY}&i=${encodeURIComponent(
+      id
+    )}&plot=full`;
 
     setStatus("loading");
     setError("");
 
-    const url = `https://www.omdbapi.com/?apikey=${API_KEY}&i=${encodeURIComponent(
-      imdbId
-    )}&plot=full`;
-
     fetch(url)
-      .then((res) => res.json())
+      .then((r) => r.json())
       .then((data) => {
         if (cancelled) return;
         if (data?.Response === "False") {
-          setError(data?.Error || "No additional data found.");
           setStatus("error");
-          setOmdb(null);
+          setError(data?.Error || "Movie not found");
+          setMovie(null);
         } else {
-          setOmdb(data);
+          setMovie(data);
           setStatus("done");
         }
       })
-      .catch((err) => {
+      .catch((e) => {
         if (cancelled) return;
-        setError(err.message || "Network error.");
         setStatus("error");
-        setOmdb(null);
+        setError(e.message || "Network error");
       });
 
     return () => {
       cancelled = true;
     };
-  }, [id, localMovie]);
+  }, [id]);
 
-  // If we have nothing at all
-  if (!localMovie && status !== "loading" && !omdb) {
+  if (status === "loading") return <p style={{ padding: 20 }}>Loading…</p>;
+  if (status === "error")
     return (
-      <div style={{ padding: "20px" }}>
+      <div style={{ padding: 20 }}>
+        <Link to="/movies">← Back</Link>
+        <p style={{ color: "#f87171", marginTop: 16 }}>Error: {error}</p>
+      </div>
+    );
+
+  if (!movie)
+    return (
+      <div style={{ padding: 20 }}>
         <Link to="/movies">← Back</Link>
         <p style={{ marginTop: 16 }}>Movie not found.</p>
       </div>
     );
-  }
-
-  // Prefer local fields; fall back to OMDb
-  const title =
-    localMovie?.title || omdb?.Title || localMovie?.name || "Untitled";
-  const poster =
-    localMovie?.poster ||
-    omdb?.Poster ||
-    localMovie?.img ||
-    "/posters/placeholder.jpg";
-  const year = localMovie?.year || omdb?.Year;
-  const rated = localMovie?.rating || omdb?.Rated;
-  const genres =
-    (Array.isArray(localMovie?.genres) && localMovie.genres.join(", ")) ||
-    omdb?.Genre;
-  const plot = localMovie?.description || omdb?.Plot;
-  const runtime = localMovie?.runtime || omdb?.Runtime;
-  const director = localMovie?.director || omdb?.Director;
-  const cast =
-    (Array.isArray(localMovie?.cast) && localMovie.cast.join(", ")) ||
-    omdb?.Actors;
 
   return (
     <div style={{ padding: "20px" }}>
       <Link to="/movies">← Back</Link>
 
       <h2 style={{ marginTop: 16 }}>
-        {title} {year ? `(${year})` : ""}
+        {movie.Title} {movie.Year ? `(${movie.Year})` : ""}
       </h2>
 
       <img
-        src={poster}
-        alt={title}
+        src={movie.Poster}
+        alt={movie.Title}
         style={{
           maxWidth: "250px",
           width: "100%",
@@ -111,44 +88,37 @@ export default function MovieDetail() {
         }}
       />
 
-      {rated ? (
+      {movie.Rated && (
         <p>
-          <strong>Rated:</strong> {rated}
+          <strong>Rated:</strong> {movie.Rated}
         </p>
-      ) : null}
-      {runtime ? (
-        <p>
-          <strong>Runtime:</strong> {runtime}
-        </p>
-      ) : null}
-      {genres ? (
-        <p>
-          <strong>Genre:</strong> {genres}
-        </p>
-      ) : null}
-      {director ? (
-        <p>
-          <strong>Director:</strong> {director}
-        </p>
-      ) : null}
-      {cast ? (
-        <p>
-          <strong>Actors:</strong> {cast}
-        </p>
-      ) : null}
-      {plot ? (
-        <p>
-          <strong>Plot:</strong> {plot}
-        </p>
-      ) : null}
-
-      {/* Status messages (optional) */}
-      {status === "loading" && (
-        <p style={{ color: "#9ca3af" }}>Fetching extra details…</p>
       )}
-      {status === "error" && error && (
-        <p style={{ color: "#f87171" }}>Couldn’t load extra details: {error}</p>
+      {movie.Runtime && (
+        <p>
+          <strong>Runtime:</strong> {movie.Runtime}
+        </p>
+      )}
+      {movie.Genre && (
+        <p>
+          <strong>Genre:</strong> {movie.Genre}
+        </p>
+      )}
+      {movie.Director && (
+        <p>
+          <strong>Director:</strong> {movie.Director}
+        </p>
+      )}
+      {movie.Actors && (
+        <p>
+          <strong>Actors:</strong> {movie.Actors}
+        </p>
+      )}
+      {movie.Plot && (
+        <p>
+          <strong>Plot:</strong> {movie.Plot}
+        </p>
       )}
     </div>
   );
 }
+``

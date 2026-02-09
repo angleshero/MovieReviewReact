@@ -1,37 +1,30 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import MovieCard from "../components/MovieCard.jsx";
-import { MERGED_MOVIES } from "../data/movies.js";
 
 const API_KEY = import.meta.env?.VITE_OMDB_API_KEY;
 
 export default function Movies() {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("newest");
-  const [remoteMovies, setRemoteMovies] = useState([]); // normalized items
+  const [movies, setMovies] = useState([]); // normalized
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
 
-    const fetchMovies = async () => {
-      // No query → reset to local-only view
+    const run = async () => {
       if (!query.trim()) {
-        setRemoteMovies([]);
+        setMovies([]);
         setError("");
         setLoading(false);
         return;
       }
 
-      // No API key → filter local list case-insensitively
       if (!API_KEY) {
-        const filtered = MERGED_MOVIES.filter((m) =>
-          (m.title || "").toLowerCase().includes(query.toLowerCase())
-        );
-        setRemoteMovies(filtered);
-        setError("");
-        setLoading(false);
+        setMovies([]);
+        setError("Missing VITE_OMDB_API_KEY in .env");
         return;
       }
 
@@ -48,9 +41,8 @@ export default function Movies() {
         if (cancelled) return;
 
         if (data?.Response === "True" && Array.isArray(data.Search)) {
-          // Normalize OMDb → our common shape
           const normalized = data.Search.map((m) => ({
-            id: m.imdbID, // used by router /movies/:id
+            id: m.imdbID, // used for /movies/:id
             title: m.Title,
             year: Number.parseInt(m.Year, 10) || m.Year,
             poster:
@@ -58,16 +50,15 @@ export default function Movies() {
                 ? m.Poster
                 : "/posters/placeholder.jpg",
             imdbID: m.imdbID,
-            type: m.Type,
           }));
-          setRemoteMovies(normalized);
+          setMovies(normalized);
         } else {
-          setRemoteMovies([]);
+          setMovies([]);
           if (data?.Error) setError(data.Error);
         }
       } catch (e) {
         if (!cancelled) {
-          setRemoteMovies([]);
+          setMovies([]);
           setError(e.message || "Network error");
         }
       } finally {
@@ -75,14 +66,11 @@ export default function Movies() {
       }
     };
 
-    fetchMovies();
+    run();
     return () => {
       cancelled = true;
     };
   }, [query]);
-
-  // Source: local catalog if no query, otherwise remote (or local-filter fallback)
-  const source = query.trim() ? remoteMovies : MERGED_MOVIES;
 
   const visible = useMemo(() => {
     const parseYear = (y) => {
@@ -91,19 +79,18 @@ export default function Movies() {
       return Number.isFinite(n) ? n : 0;
     };
 
-    const sorted = [...source].sort((a, b) => {
+    const sorted = [...movies].sort((a, b) => {
       if (sort === "newest") return parseYear(b.year) - parseYear(a.year);
       return parseYear(a.year) - parseYear(b.year);
     });
 
     return sorted.slice(0, 6);
-  }, [source, sort]);
+  }, [movies, sort]);
 
   return (
     <>
       <header>
         <h1 className="site-title">Movie Reviews NOW!</h1>
-
         <nav>
           <input
             type="text"
@@ -112,7 +99,6 @@ export default function Movies() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
-
           <div className="sort-container">
             <select value={sort} onChange={(e) => setSort(e.target.value)}>
               <option value="newest">Newest to Oldest</option>
@@ -130,7 +116,7 @@ export default function Movies() {
 
         <div className="movies">
           {visible.map((m) => (
-            <MovieCard key={m.id ?? m.imdbID} movie={m} />
+            <MovieCard key={m.id} movie={m} />
           ))}
         </div>
       </main>

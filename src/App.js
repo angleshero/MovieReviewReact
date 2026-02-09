@@ -4,7 +4,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 import Home from "./pages/Home.jsx";
 import Movies from "./pages/Movies.jsx";
-import MovieDetail from "./pages/MovieDetail.jsx"; 
+import MovieDetail from "./pages/MovieDetails.jsx"; 
 // If your file is named MovieDetails.jsx instead, use:
 // import MovieDetail from "./pages/MovieDetails.jsx";
 

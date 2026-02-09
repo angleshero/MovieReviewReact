@@ -3,7 +3,7 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Movies from "./pages/Movies";
-import MovieDetail from "./pages/MovieDetails.jsx";
+import MovieDetails from "./pages/MovieDetails.jsx";
 import "./styles.css";
 
 export default function App() {
