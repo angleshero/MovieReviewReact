@@ -9,7 +9,7 @@ export default function MovieDetails() {
   const [movie, setMovie] = useState(null);
 
   useEffect(() => {
-    fetch(`https://www.omdbapi.com/?apikey=${API_KEY}&i=${id}&plot=full`)
+    fetch(`https://www.omdbapi.com/?apikey=${API_KEY=21463539&s}&i=${id}&plot=full`)
       .then((res) => res.json())
       .then((data) => setMovie(data));
   }, [id]);

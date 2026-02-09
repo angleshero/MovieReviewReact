@@ -19,7 +19,7 @@ export default function Movies() {
     const fetchMovies = async () => {
       setLoading(true);
       const res = await fetch(
-        `https://www.omdbapi.com/?apikey=${API_KEY}&s=${query}`
+        `https://www.omdbapi.com/?apikey=${API_KEY=21463539&s}&s=${query}`
       );
       const data = await res.json();
 
