@@ -1,61 +1,99 @@
+
 import React, { useMemo, useState } from 'react'
 import './styles.css'
 
+// Dynamically import all images in src/assets (Vite feature)
+const imageMap = Object.fromEntries(
+  Object.entries(import.meta.glob('./assets/*.{png,jpg,jpeg,webp,svg}', { eager: true }))
+    .map(([path, mod]) => {
+      const fileName = path.split('/').pop() 
+      return [fileName.toLowerCase(), mod.default]
+    })
+)
 
-import beforeSunrise from './assets/before-sunrise.jpg'
-import bigFish from './assets/bigfish.jpg'
-import ghostDog from './assets/ghostdog.jpg'
-import mallrats from './assets/Mallrats.jpg'
-import meteorMan from './assets/MeteorMan.jpg'
-import bigHero6 from './assets/BigHero6.jpg'
+// Helper to resolve an image by filename (case-insensitive)
+function resolveImg(fileName, fallback = null) {
+  if (!fileName) return fallback
+  return imageMap[fileName.toLowerCase()] ?? fallback
+}
 
-
+// You can move this to a separate file or fetch from an API
 const MOVIES = [
-  { id: 1, title: 'Before Sunrise', img: beforeSunrise, year: 1995, rating: 4.5 },
-  { id: 2, title: 'Big Fish',       img: bigFish,       year: 2003, rating: 4.5 },
-  { id: 3, title: 'Ghost Dog',      img: ghostDog,      year: 1999, rating: 4.5 },
-  { id: 4, title: 'Mallrats',       img: mallrats,      year: 1995, rating: 4.5 },
-  { id: 5, title: 'Meteor Man',     img: meteorMan,     year: 1993, rating: 4.5 },
-  { id: 6, title: 'Big Hero 6',     img: bigHero6,      year: 2014, rating: 4.5 },
+  { id: 1, title: 'Before Sunrise', cover: 'before-sunrise.jpg', year: 1995, rating: 4.5 },
+  { id: 2, title: 'Big Fish',       cover: 'bigfish.jpg',        year: 2003, rating: 4.5 },
+  { id: 3, title: 'Ghost Dog',      cover: 'ghostdog.jpg',       year: 1999, rating: 4.5 },
+  { id: 4, title: 'Mallrats',       cover: 'Mallrats.jpg',       year: 1995, rating: 4.5 },
+  { id: 5, title: 'Meteor Man',     cover: 'MeteorMan.jpg',      year: 1993, rating: 4.5 },
+  { id: 6, title: 'Big Hero 6',     cover: 'BigHero6.jpg',       year: 2014, rating: 4.5 },
 ]
 
-function Stars({ rating }) {
-  const full = Math.floor(rating)
+function Stars({ rating = 0, outOf = 5 }) {
+  const full = Math.max(0, Math.min(outOf, Math.floor(rating)))
   const half = rating % 1 >= 0.5
+  const empty = outOf - full - (half ? 1 : 0)
+
   return (
-    <div className="movie__ratings">
+    <div className="movie__ratings" aria-label={`Rating: ${rating} out of ${outOf}`}>
       {Array.from({ length: full }).map((_, i) => (
-        <i key={`full-${i}`} className="fas fa-star" aria-hidden="true"></i>
+        <i key={`full-${i}`} className="fas fa-star" aria-hidden="true" />
       ))}
-      {half && <i className="fas fa-star-half-alt" aria-hidden="true"></i>}
+      {half && <i className="fas fa-star-half-alt" aria-hidden="true" />}
+      {Array.from({ length: empty }).map((_, i) => (
+        <i key={`empty-${i}`} className="far fa-star" aria-hidden="true" />
+      ))}
     </div>
   )
 }
 
 function MovieCard({ movie }) {
+  const { title, year, rating, cover } = movie
+  const imgSrc = resolveImg(cover)
   return (
     <div className="movie">
       <figure className="movie__img--wrapper">
-        <img className="movie__img" src={movie.img} alt={movie.title} />
+        {imgSrc ? (
+          <img className="movie__img" src={imgSrc} alt={title} loading="lazy" />
+        ) : (
+          <div className="movie__img movie__img--placeholder" aria-label={`${title} cover missing`}>
+            No Image
+          </div>
+        )}
       </figure>
-      <div className="movie__title">{movie.title}</div>
-      <Stars rating={movie.rating} />
+      <div className="movie__title">{title}</div>
+      <Stars rating={rating} />
+      <div className="movie__meta" aria-label="metadata">
+        <small>{year}</small>
+      </div>
     </div>
   )
 }
 
-export default function MovieReviews() {
+export default function MovieReviews({
+  initialMovies = MOVIES,
+  initialSort = 'newest', // 'newest' | 'oldest'
+}) {
   const [query, setQuery] = useState('')
-  const [sort, setSort] = useState('newest')
+  const [sort, setSort] = useState(initialSort)
 
   const filteredAndSorted = useMemo(() => {
-    const list = MOVIES.filter(m =>
-      m.title.toLowerCase().includes(query.trim().toLowerCase())
-    )
-    return list.sort((a, b) =>
-      sort === 'newest' ? b.year - a.year : a.year - b.year
-    )
-  }, [query, sort])
+    const q = query.trim().toLowerCase()
+    const byTitle = (m) => m.title?.toLowerCase().includes(q)
+
+    // shallow copy before sorting to avoid mutating props/const
+    const list = (q ? initialMovies.filter(byTitle) : initialMovies).slice()
+
+    const compare = (a, b) => {
+      // stable comparator: primary by year, secondary by title to avoid jitter
+      if (sort === 'newest') {
+        if (b.year !== a.year) return b.year - a.year
+      } else {
+        if (a.year !== b.year) return a.year - b.year
+      }
+      return a.title.localeCompare(b.title)
+    }
+
+    return list.sort(compare)
+  }, [initialMovies, query, sort])
 
   return (
     <>
@@ -68,10 +106,11 @@ export default function MovieReviews() {
             className="searchName"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            aria-label="Search movies"
           />
-          <button>Home</button>
-          <button>Contact</button>
-          <button>Sign Up</button>
+          <button type="button">Home</button>
+          <button type="button">Contact</button>
+          <button type="button">Sign Up</button>
 
           <div className="sort-container">
             <label htmlFor="movieSort" className="sr-only">Sort</label>
@@ -89,16 +128,20 @@ export default function MovieReviews() {
       </header>
 
       <main>
-        <div className="movies">
-          {filteredAndSorted.map((movie) => (
-            <MovieCard key={movie.id} movie={movie} />
-          ))}
-        </div>
+        {filteredAndSorted.length === 0 ? (
+          <p className="empty-state">No movies match “{query}”.</p>
+        ) : (
+          <div className="movies">
+            {filteredAndSorted.map((movie) => (
+              <MovieCard key={movie.id} movie={movie} />
+            ))}
+          </div>
+        )}
       </main>
 
       <footer>
-        <button>Contact</button>
-        <button>Reviews</button>
+        <button type="button">Contact</button>
+        <button type="button">Reviews</button>
         <p>
           <span className="copyright"> Copyright 2025 ©</span> Movie Reviews NOW!
         </p>
@@ -106,4 +149,3 @@ export default function MovieReviews() {
     </>
   )
 }
-
