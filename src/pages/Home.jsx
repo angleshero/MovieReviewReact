@@ -1,47 +1,16 @@
-import React, { useState, useEffect, use } from "react";
-import axios from "axios";
+
+import React from "react";
 import { useNavigate } from "react-router-dom";
+import "./Home.css";
 
-const Home = () => {
-const [users, setUsers] = useState([]);
-const navigate = useNavigate();
-async function getUsers() {
-  const { data } = await axios.get("https://jsonplaceholder.typicode.com/users");
-  setUsers(data);
-}
-
-useEffect(() => {
-  getUsers();
-}, []);
-
+export default function Home() {
+  const navigate = useNavigate();
   return (
-    <div className="container">
-  <div className="row">
-    <div className="user-list">
-      {users.map((user) => (
-        <div className="user" key={user.id} onClick={() => navigate(`${user.id}`)}>
-        <div className="user-card">
-            
-          <div className="user-card__container">
-            <h3>{user.name}</h3>
-            <p>
-              <b>Email:</b> {user.email}
-            </p>
-            <p>
-              <b>Phone:</b> {user.phone}
-            </p>
-            <p>
-              <b>Website:</b>
-              {user.website}
-            </p>
-          </div>
-        </div>
-      </div>
-      ))}
-        
+    <div className="home-container">
+      <h1 className="home-title">MOVIES</h1>
+      <button className="enter-btn" onClick={() => navigate("/movies")}>
+        ENTER
+      </button>
     </div>
-  </div>
-</div>
   );
-}   
-export default Home;
+}
