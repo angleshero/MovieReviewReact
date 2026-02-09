@@ -15,7 +15,7 @@ export default function MovieDetail() {
 
     if (!API_KEY) {
       setStatus("error");
-      setError("Missing VITE_OMDB_API_KEY in .env");
+      setError("OMDB_API_KEY in .env");
       return;
     }
 

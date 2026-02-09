@@ -1,4 +1,45 @@
 
+/* Home */
+
+
+.home-container {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;     /* stack MOVIES & ENTER */
+  align-items: center;        /* center horizontally */
+  justify-content: center;    /* center vertically */
+  background: #111827;        /* nice dark background */
+  color: white;
+  text-align: center;
+}
+
+.home-title {
+  font-size: 4rem;           /* MAKE IT BIG */
+  font-weight: 800;
+  margin-bottom: 30px;
+  letter-spacing: 4px;
+}
+
+.enter-btn {
+  font-size: 2rem;           /* BIG BUTTON TEXT */
+  padding: 15px 35px;
+  background: #22c55e;
+  border: none;
+  color: #000;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+.enter-btn:hover {
+  background: #16a34a;
+  transform: scale(1.05);
+}
+
+
+
 body {
   background-color: white;
   font-family: Arial, sans-serif;

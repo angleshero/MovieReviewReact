@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import MovieCard from "../components/MovieCard.jsx";
 
+
 const API_KEY = process.env.OMDB_API_KEY;
 
 export default function Movies() {
