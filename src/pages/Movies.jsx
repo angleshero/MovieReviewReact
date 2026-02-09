@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import MovieCard from "../components/MovieCard.jsx";
 
-const API_KEY = process.env.NEXT_PUBLIC_OMDB_API_KEY;
+const API_KEY = process.env.OMDB_API_KEY;
 
 export default function Movies() {
   const [query, setQuery] = useState("");
