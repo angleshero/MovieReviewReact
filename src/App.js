@@ -1,6 +1,6 @@
 
 import React from 'react'
-import MovieReviews from './pages/MovieReviews.jsx'
+
 import './App.css'
 
 function App() {
