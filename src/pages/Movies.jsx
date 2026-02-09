@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import MovieCard from "../components/MovieCard.jsx";
 
-const API_KEY = import.meta.env?.VITE_OMDB_API_KEY;
+const API_KEY = import.meta.env?.REACT_APP_OMDB_API_KEY;
 
 export default function Movies() {
   const [query, setQuery] = useState("");
@@ -24,7 +24,7 @@ export default function Movies() {
 
       if (!API_KEY) {
         setMovies([]);
-        setError("Missing VITE_OMDB_API_KEY in .env");
+        setError("Missing REACT_APP_OMDB_API_KEY in .env");
         return;
       }
 
