@@ -3,7 +3,7 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Movies from "./pages/Movies";
-import MovieDetails from "./pages/MovieDetails";
+import MovieDetail from "./pages/MovieDetails.jsx";
 import "./styles.css";
 
 export default function App() {
@@ -11,7 +11,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/movies" element={<Movies />} />
-      <Route path="/movie/:id" element={<MovieDetails />} />
+      <Route path="/movies/:id" element={<MovieDetails />} />
     </Routes>
   );
 }

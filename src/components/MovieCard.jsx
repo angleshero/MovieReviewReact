@@ -7,7 +7,7 @@ export default function MovieCard({ movie }) {
   return (
     <div
       className="movie"
-      onClick={() => navigate(`/movie/${movie.imdbID}`)}
+      onClick={() => navigate(`/movie/${movie.id}`)}
       style={{ cursor: "pointer" }}
     >
       <figure className="movie__img--wrapper">

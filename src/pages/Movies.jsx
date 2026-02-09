@@ -1,50 +1,103 @@
 
 import React, { useEffect, useMemo, useState } from "react";
-import MovieCard from "../components/MovieCard";
+import MovieCard from "../components/MovieCard.jsx";
+import { MERGED_MOVIES } from "../data/movies.js";
 
-const API_KEY = import.meta.env.VITE_OMDB_API_KEY;
+const API_KEY = import.meta.env?.VITE_OMDB_API_KEY;
 
 export default function Movies() {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("newest");
-  const [movies, setMovies] = useState([]);
+  const [remoteMovies, setRemoteMovies] = useState([]); // normalized items
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!query.trim()) {
-      setMovies([]);
-      return;
-    }
+    let cancelled = false;
 
     const fetchMovies = async () => {
-      setLoading(true);
-      const res = await fetch(
-        `https://www.omdbapi.com/?apikey==21463539&s${API_KEY}&s=${query}`
-      );
-      const data = await res.json();
-
-      if (data.Response === "True") {
-        setMovies(data.Search);
-      } else {
-        setMovies([]);
+      // No query → reset to local-only view
+      if (!query.trim()) {
+        setRemoteMovies([]);
+        setError("");
+        setLoading(false);
+        return;
       }
 
-      setLoading(false);
+      // No API key → filter local list case-insensitively
+      if (!API_KEY) {
+        const filtered = MERGED_MOVIES.filter((m) =>
+          (m.title || "").toLowerCase().includes(query.toLowerCase())
+        );
+        setRemoteMovies(filtered);
+        setError("");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError("");
+
+        const url = `https://www.omdbapi.com/?apikey=${API_KEY}&s=${encodeURIComponent(
+          query
+        )}`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (cancelled) return;
+
+        if (data?.Response === "True" && Array.isArray(data.Search)) {
+          // Normalize OMDb → our common shape
+          const normalized = data.Search.map((m) => ({
+            id: m.imdbID, // used by router /movies/:id
+            title: m.Title,
+            year: Number.parseInt(m.Year, 10) || m.Year,
+            poster:
+              m.Poster && m.Poster !== "N/A"
+                ? m.Poster
+                : "/posters/placeholder.jpg",
+            imdbID: m.imdbID,
+            type: m.Type,
+          }));
+          setRemoteMovies(normalized);
+        } else {
+          setRemoteMovies([]);
+          if (data?.Error) setError(data.Error);
+        }
+      } catch (e) {
+        if (!cancelled) {
+          setRemoteMovies([]);
+          setError(e.message || "Network error");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     };
 
     fetchMovies();
+    return () => {
+      cancelled = true;
+    };
   }, [query]);
 
-  const visible = useMemo(() => {
-    const parseYear = (y) => parseInt(y) || 0;
+  // Source: local catalog if no query, otherwise remote (or local-filter fallback)
+  const source = query.trim() ? remoteMovies : MERGED_MOVIES;
 
-    const sorted = [...movies].sort((a, b) => {
-      if (sort === "newest") return parseYear(b.Year) - parseYear(a.Year);
-      return parseYear(a.Year) - parseYear(b.Year);
+  const visible = useMemo(() => {
+    const parseYear = (y) => {
+      if (typeof y === "number") return y;
+      const n = parseInt(y, 10);
+      return Number.isFinite(n) ? n : 0;
+    };
+
+    const sorted = [...source].sort((a, b) => {
+      if (sort === "newest") return parseYear(b.year) - parseYear(a.year);
+      return parseYear(a.year) - parseYear(b.year);
     });
 
     return sorted.slice(0, 6);
-  }, [movies, sort]);
+  }, [source, sort]);
 
   return (
     <>
@@ -71,10 +124,13 @@ export default function Movies() {
 
       <main>
         {loading && <p style={{ padding: 20 }}>Loading...</p>}
+        {error && !loading && (
+          <p style={{ padding: 20, color: "#f87171" }}>Error: {error}</p>
+        )}
 
         <div className="movies">
           {visible.map((m) => (
-            <MovieCard key={m.imdbID} movie={m} />
+            <MovieCard key={m.id ?? m.imdbID} movie={m} />
           ))}
         </div>
       </main>
