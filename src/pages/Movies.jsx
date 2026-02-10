@@ -1,108 +1,61 @@
+const moviesWrapper = document.querySelector (".movies")
+const searchName = document.querySelector (".searchName")
 
-import React, { useEffect, useMemo, useState } from "react";
-import MovieCard from "../components/MovieCard.jsx";
-import assets from "../assets";
+console.log (moviesWrapper)
 
 
-function Movies( ) {
-  const [movies, setMovies] = useState([]);
-  const [status, setStatus] = useState("loading");
-  const [error, setError] = useState(null);
 
-  return (
-    <div className="moviesWrapper">
-      <div className="movie">
-        <figure className="movie__img--wrapper">
-          <img className="movie__img" src={assets.BeforeSunrise} alt="" />
-        </figure>
-        <div className="movie__title">
-          Before Sunrise
-        </div>
-        <div className="movie__ratings">
-          <i className="fas fa-star"></i>
-          <i className="fas fa-star"></i>
-          <i className="fas fa-star"></i>
-          <i className="fas fa-star"></i>
-          <i className="fas fa-star-half-alt"></i>
-        </div>
-      </div>
-      <div className="movie">
-        <figure className="movie__img--wrapper">
-          <img className="movie__img" src={assets.BigFish} alt="" />
-        </figure>
-        <div className="movie__title">
-          Big Fish
-        </div>
-        <div className="movie__ratings">
-          <i className="fas fa-star"></i>
-          <i className="fas fa-star"></i>
-          <i className="fas fa-star"></i>
-          <i className="fas fa-star"></i>
-          <i className="fas fa-star-half-alt"></i>
-        </div>
-      </div>
-      <div className="movie">
-        <figure className="movie__img--wrapper">
-          <img className="movie__img" src={assets.GhostDog} alt="" />
-        </figure>
-        <div className="movie__title">
-          Ghost Dog
-        </div>
-        <div className="movie__ratings">
-          <i className="fas fa-star"></i>
-          <i className="fas fa-star"></i>
-          <i className="fas fa-star"></i>
-          <i className="fas fa-star"></i>
-          <i className="fas fa-star-half-alt"></i>
-        </div>
-      </div>
-      <div className="movie">
-        <figure className="movie__img--wrapper">
-          <img className="movie__img" src={assets.Mallrats} alt="" />
-        </figure>
-        <div className="movie__title">
-          Mallrats
-        </div>
-        <div className="movie__ratings">
-          <i className="fas fa-star"></i>
-          <i className="fas fa-star"></i>
-          <i className="fas fa-star"></i>
-          <i className="fas fa-star"></i>
-          <i className="fas fa-star-half-alt"></i>
-        </div>
-      </div>
-      <div className="movie">
-        <figure className="movie__img--wrapper">
-          <img className="movie__img" src={assets.MeteorMan} alt="" />
-        </figure>
-        <div className="movie__title">
-          Meteor Man
-        </div>
-        <div className="movie__ratings">
-          <i className="fas fa-star"></i>
-          <i className="fas fa-star"></i>
-          <i className="fas fa-star"></i>
-          <i className="fas fa-star"></i>
-          <i className="fas fa-star-half-alt"></i>
-        </div>
-      </div>
-      <div className="movie">
-        <figure className="movie__img--wrapper">
-          <img className="movie__img" src={assets.BigHero6} alt="" />
-        </figure>
-        <div className="movie__title">
-          Big Hero 6 
-        </div>
-        <div className="movie__ratings">
-          <i className="fas fa-star"></i>
-          <i className="fas fa-star"></i>
-          <i className="fas fa-star"></i>
-          <i className="fas fa-star"></i>
-          <i className="fas fa-star-half-alt"></i>
-        </div>
-      </div>
-    </div>
-  );
+function searchChange(event) {
+     renderMovies(event.target.value)  
+     searchName.innerHTML = event.target.value    
+}
+
+let currentMovies = [];
+
+//rendering movies 
+
+async function renderMovies(searchTerm) {
+
+const response = await fetch (`https://www.omdbapi.com/?s=${searchTerm}&apikey=21463539&s`);
+const data = await response.json();
+currentMovies = data.Search;
+displayMovies(currentMovies);
+
+}
+
+
+//displaying movies 
+
+function displayMovies(movieList) {
+     moviesWrapper.innerHTML = movieList.slice(0, 6).map((movie) => {
+    return `
+    <div class="movie">
+    <img src=${movie.Poster} alt="" />
+    <h2>${movie.Title}</h2>
+    <h4>${movie.Year}</h4>
+    <button>Learn More</button>
+    </div> 
+    `
+       ;
+    }).join ('');
+}
+
+
+//sorting movies
+
+
+function sortChange(event) {
+    const sortOption = event.target.value;
+
+    let sortedMovies = [...currentMovies];
+
+    if (sortOption === "newest") {
+        sortedMovies.sort((a, b) => b.Year - a.Year);
+    } else if (sortOption === "oldest") {
+        sortedMovies.sort((a, b) => a.Year - b.Year);
+}
+displayMovies(sortedMovies);
+
 }
 
 export default Movies;
