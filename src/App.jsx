@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Movies from "./pages/Movies";
 import MovieDetails from "./pages/MovieDetails.jsx";
 import "./styles.css";
+import Footer from "./components/Footer.jsx";
 
 export default function App() {
   return (

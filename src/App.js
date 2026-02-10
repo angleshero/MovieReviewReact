@@ -6,6 +6,7 @@ import Home from "./pages/Home.jsx";
 import Movies from "./pages/Movies.jsx";
 import MovieDetail from "./pages/MovieDetails.jsx"; 
 import "./App.css";
+import Footer from "./components/Footer.jsx";
 
 export default function App() {
   return (
