@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 
-const API_KEY = process.env.OMDB_API_KEY;
+const API_KEY = "21463539";
 
 export default function MovieDetail() {
   const { id } = useParams();
