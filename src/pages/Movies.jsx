@@ -1,3 +1,9 @@
+import React, { useState, useMemo } from 'react';
+
+function Movies() {
+
+
+
 const moviesWrapper = document.querySelector (".movies")
 const searchName = document.querySelector (".searchName")
 
@@ -56,6 +62,6 @@ function sortChange(event) {
 }
 displayMovies(sortedMovies);
 
-}
+}}
 
 export default Movies;
