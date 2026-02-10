@@ -4,7 +4,7 @@ import MovieCard from "../components/MovieCard.jsx";
 import assets from "../assets";
 
 
-function Movies( assets ) {
+function Movies( ) {
   const [movies, setMovies] = useState([]);
   const [status, setStatus] = useState("loading");
   const [error, setError] = useState(null);
