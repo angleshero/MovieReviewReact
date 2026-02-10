@@ -199,4 +199,4 @@ export default function Movies() {
     </div>
   );
 }
-``
+
