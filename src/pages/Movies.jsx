@@ -1,5 +1,6 @@
 
 import React, { useEffect, useMemo, useState } from "react";
+import './App.css';
 
 const API_KEY = "21463539"; // ← replace with your key
 
