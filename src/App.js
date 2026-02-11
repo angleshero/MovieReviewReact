@@ -23,6 +23,7 @@ export default function App() {
 
       {/* Fallback for any unknown route */}
       <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="/footer" element={<Footer />} />
     </Routes>
     </Router>
   );
